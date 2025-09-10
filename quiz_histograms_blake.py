@@ -5,8 +5,7 @@ import streamlit as st
 from dataclasses import dataclass
 from typing import List, Optional
 from scipy.stats import norm
-
-st.set_page_config(page_title="Histogram Quick Quiz", page_icon="curiousStat_icon.png", layout="centered")
+st.set_page_config(page_title="How well do you know dogs?", page_icon="curiousStat_icon.png", layout="centered")
 
 # ---------- Data model ----------
 @dataclass
@@ -18,58 +17,34 @@ class MCQ:
 
 QUESTIONS = [
     MCQ(
-        prompt="What type of data is best represented by a histogram?",
-        options=["Categorical data (e.g., eye color)", "Continuous numerical data (e.g., height)","Names of students","Phone numbers"],
-        correct_idx=1,
-        explain="Histograms are for continuous (or large-range discrete) data; categories use bar charts."
-    ),
-    MCQ(
-        prompt="What’s the best description of this distribution?",
-        options=["Symmetric", "Right-skewed", "Bimodal", "Uniform"],
+        prompt="Which dog breed has the highest bite force?",
+        options=["Kangal", "Rottweiler", "German Shepherd", "Pit Bull"],
         correct_idx=0,
-        explain="Imagine a vertical line down the center: both sides roughly match (symmetric)."
+        explain="The Kangal is known for its powerful bite force, significantly stronger than other breeds."            
     ),
     MCQ(
-        prompt="In a histogram with unequal bin widths, what corresponds to frequency?",
-        options=["Bar height","Bar area (height × bin width)","Number of bins","Axis labels"],
+        prompt="What class of breed does the Golden Retriever belong to?",
+        options=["Herding", "Sporting", "Working", "Toy"],
         correct_idx=1,
-        explain="When bin widths differ, the area is proportional to frequency; height alone can mislead."
+        explain="Golden Retrievers are classified as Sporting breeds, known for their hunting and retrieving abilities."
     ),
     MCQ(
-        prompt="Most bars are on the left with a long tail to the right. The distribution is:",
-        options=["Symmetric","Left-skewed (negative)","Right-skewed (positive)","Uniform"],
+        prompt="Statistically, which dog breed is most likely to attack without provocation?",
+        options=["Labrador","Pit Bull","German Shepherd","Rottweiler"],
+        correct_idx=3,
+        explain="Rottweilers have a history of aggressive behavior and are often involved in unprovoked attacks."
+    ),
+    MCQ(
+        prompt="Which breed is ideal for hiking and outdoor activities?",
+        options=["Labrador","Belgian Malinois","Golden Retriever","Rottweiler"],
         correct_idx=2,
-        explain="Pile on the left + tail to the right → right/positive skew."
+        explain="Golden Retrievers are known for their stamina and love for outdoor activities."
     ),
     MCQ(
-        prompt="If you double the bin width (fewer, wider bins), the histogram will usually:",
-        options=["Show more fine-grained detail","Hide small clusters/gaps","Become perfectly normal","Not change at all"],
+        prompt="Which breed is ideal as a first time pet?",
+        options=["Bull Mastiff","Labrador","Beagle","Bulldog"],
         correct_idx=1,
-        explain="Wider bins smooth the shape and can hide structure."
-    ),
-    MCQ(
-        prompt="Two classes’ histograms: A is tall/narrow around the mean; B is flat/spread out. What’s true?",
-        options=["A has lower variability than B","B has smaller standard deviation","They must have equal variability","B’s mean is higher than A’s"],
-        correct_idx=0,
-        explain="Tight clustering → lower variability; flat/spread → higher variability."
-    ),
-    MCQ(
-        prompt="Why use a histogram instead of the raw data list?",
-        options=["To display exact values","To summarize the distribution’s shape and spread","To compute the mean exactly","Because it’s required by default"],
-        correct_idx=1,
-        explain="Histograms reveal shape, center, spread, gaps, and outliers at a glance."
-    ),
-    MCQ(
-        prompt="You sample 1,000,000 values from a Normal(μ=50, σ=10) and plot many bins. Which is accurate?",
-        options=["It will be a perfect bell curve","It will closely approximate the bell curve","It will be skewed","Only bin width matters, not data"],
-        correct_idx=1,
-        explain="Large samples approximate the underlying distribution well, though not perfectly."
-    ),
-    MCQ(
-        prompt="Gaps between bars in a histogram usually indicate:",
-        options=["Missing values in the CSV","Intervals with few or no observations","A plotting bug","Wrong x-axis scale"],
-        correct_idx=1,
-        explain="Gaps typically mean no data fell in those intervals."
+        explain="Labradors are known for their friendly and tolerant attitude, making them fabulous family pets."
     ),
 ]
 
@@ -186,7 +161,7 @@ data1 = np.random.normal(loc=mean, scale=std, size=200)
 
 
 # ---------- UI ----------
-st.title("Stats Quiz: Histograms")
+st.title("How well do you know dogs?")
 # st.caption("Test your knowledge about Histograms")
 
 if "started" not in st.session_state:
@@ -195,15 +170,15 @@ if "started" not in st.session_state:
 # Landing state (before first reveal)
 if not st.session_state.started:
     st.write("""
-         Histograms are a powerful way to visualize data. This quick quiz will test your understanding of histograms, their interpretation, and related concepts.
+         Welcome to the dog breed quiz! 🐶 This will test your knowledge about different dog breeds.
          Click **Start** when you are ready!
          """)
     cols = st.columns([1,1,1])
     with cols[1]:
         st.button('Start', on_click=click_start, width='stretch', type='primary')
     with st.container(border=True, ):
-        st.info("If you need a refresher or if you would like to learn more about histograms first, check out this video:")
-        st.video("https://youtu.be/hdUDyozbJpo")
+        st.info("If you want to learn more about dogs, check out this video:")
+        st.video("https://www.youtube.com/watch?v=JJVFSWHZYjY")
     init_state()
 else:
     # Progress
@@ -216,54 +191,14 @@ else:
     with st.container(border=True, ):
         st.markdown(f"**{q.prompt}**")
 
-        if st.session_state.idx==1:
-            if "data" not in st.session_state:
-                st.session_state.data = generate_data(par_mean = 2, par_std = 1.5)
-
-            fig, ax = plt.subplots()
-            ax.hist(st.session_state.data, bins=50, edgecolor="black", density=True, alpha=0.6)
-            ax.set_xlim(-6, 6)
-            ax.set_ylim(0, 0.5)
-            ax.set_xlabel("Value")
-            ax.set_ylabel("Density")
-            st.pyplot(fig)
-
-            choice = st.radio(
-                "Choose one:",
-                options=list(enumerate(q.options)),
-                format_func=lambda x: x[1],
-                index=None if st.session_state.answers[st.session_state.idx] is None else st.session_state.answers[st.session_state.idx],
-                key=f"choice_{st.session_state.idx}",
-            )
-
-        # if st.session_state.idx==2:
-        #     if "data" not in st.session_state:
-        #         st.session_state.data = generate_data(par_mean = 2, par_std = 1.5)
-        #     slider_mean = st.slider("Mean", -3.0, 3.0, 0.0, step=0.05)
-        #     slider_std = st.slider("Standard Deviation", 0.5, 3.0, 1.75, step=0.05)
-              
-        #     x1 = np.linspace(-6, 6, 1000)
-        #     y1 = norm.pdf(x1, slider_mean, slider_std)
-
-        #     fig, ax = plt.subplots()
-        #     ax.hist(st.session_state.data, bins=18, edgecolor="black", density=True, alpha=0.6)
-        #     ax.plot(x1, y1, 'r-', lw=2, label="Fitted Normal Distribution")
-        #     ax.set_xlim(-6, 6)
-        #     ax.set_ylim(0, 0.5)
-        #     ax.set_xlabel("Value")
-        #     ax.set_ylabel("Density")
-        #     st.pyplot(fig)
-
-        #     choice = [slider_mean]
-
-        if st.session_state.idx==0 or st.session_state.idx>=2:
-            choice = st.radio(
-                "Choose one:",
-                options=list(enumerate(q.options)),
-                format_func=lambda x: x[1],
-                index=None if st.session_state.answers[st.session_state.idx] is None else st.session_state.answers[st.session_state.idx],
-                key=f"choice_{st.session_state.idx}",
-            )
+        
+        choice = st.radio(
+            "Choose one:",
+            options=list(enumerate(q.options)),
+            format_func=lambda x: x[1],
+            index=None if st.session_state.answers[st.session_state.idx] is None else st.session_state.answers[st.session_state.idx],
+            key=f"choice_{st.session_state.idx}",
+        )
 
         cols = st.columns([1,1])
         with cols[0]:
@@ -296,7 +231,15 @@ else:
             else:
                 st.error(f"❌ Not quite. Correct answer: **{q.options[correct_idx]}**")
             st.caption(q.explain)
-
+            if st.session_state.idx == 0:
+                st.image("Kangal.jpg")
+            elif st.session_state.idx == 1 or st.session_state.idx == 3:
+                st.image("GoldenRetriever.jpg")
+            elif st.session_state.idx == 2:
+                st.image("Rottweiler.jpg")
+            elif st.session_state.idx == 4:
+                st.image("Labrador.jpg")
+                
         if nxt and st.session_state.revealed[st.session_state.idx]:
             next_question()
 
@@ -324,4 +267,4 @@ if quiz_finished():
     with c1:
         st.button("🔁 Try again", on_click=reset_quiz)
     with c2:
-        st.link_button("📚 Refresh your memory on histograms", "https://youtu.be/hdUDyozbJpo")
+        st.link_button("Here are some fun facts about dogs which you might find interesting:", "https://www.youtube.com/watch?v=JJVFSWHZYjY")
