@@ -5,7 +5,7 @@ import streamlit as st
 from dataclasses import dataclass
 from typing import List, Optional
 from scipy.stats import norm
-st.set_page_config(page_title="How well do you know dogs?", page_icon="curiousStat_icon.png", layout="centered")
+st.set_page_config(page_title="How well do you know dogs?", page_icon="Page_icon.png", layout="centered")
 
 # ---------- Data model ----------
 @dataclass
